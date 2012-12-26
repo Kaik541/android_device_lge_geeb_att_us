@@ -24,4 +24,4 @@ TARGET_KERNEL_CONFIG := cyanogen_j1sp-perf_defconfig
 
 
 # inherit from the proprietary version
--include vendor/lge/geehrc/BoardConfigVendor.mk
+-include vendor/lge/geehrc_sp/BoardConfigVendor.mk

@@ -20,8 +20,8 @@
 # Everything in this directory will become public
 
 ## (2) Also get non-open-source specific aspects if available
-$(call inherit-product-if-exists, vendor/samsung/geehrc_sp/geehrc_sp-vendor.mk)
+$(call inherit-product-if-exists, vendor/lge/geehrc_sp/geehrc_sp-vendor.mk)
 
 
-# Inherit from d2-common
+# Inherit from gee-common
 $(call inherit-product, device/lge/gee-common/gee-common.mk)

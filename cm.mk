@@ -18,7 +18,7 @@
 $(call inherit-product, vendor/cm/config/cdma.mk)
 
 # Release name
-PRODUCT_RELEASE_NAME := geehrc
+PRODUCT_RELEASE_NAME := geehrc_sp
 
 # Inherit some common CM stuff.
 $(call inherit-product, vendor/cm/config/common_full_phone.mk)
@@ -30,8 +30,8 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 $(call inherit-product, vendor/cm/config/nfc_enhanced.mk)
 
 # Inherit device configuration
-$(call inherit-product, device/lge/geehrc/device.mk)
-$(call inherit-product-if-exists, vendor/lge/geehrc/device-vendor.mk)
+$(call inherit-product, device/lge/geehrc_sp/device.mk)
+$(call inherit-product-if-exists, vendor/lge/geehrc_sp/device-vendor.mk)
 
 TARGET_SCREEN_HEIGHT := 1280
 TARGET_SCREEN_WIDTH := 768
@@ -40,4 +40,4 @@ PRODUCT_DEVICE := geehrc_sp
 PRODUCT_NAME := cm_geehrc_sp
 
 #Set build fingerprint / ID / Prduct Name ect.
-PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=occam TARGET_DEVICE=geehrc BUILD_FINGERPRINT=google/occam/geehrc:4.2/JOP40C/527662:user/release-keys PRIVATE_BUILD_DESC="occam-user 4.2 JOP40C 527662 release-keys"
+PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=cm_geehrc_sp TARGET_DEVICE=geehrc_sp BUILD_FINGERPRINT=google/occam/geehrc:4.2/JOP40C/527662:user/release-keys PRIVATE_BUILD_DESC="occam-user 4.2 JOP40C 527662 release-keys"

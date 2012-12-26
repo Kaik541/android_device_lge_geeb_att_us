@@ -24,12 +24,12 @@ PRODUCT_COPY_FILES := device/sample/etc/apns-full-conf.xml:system/etc/apns-conf.
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
 PRODUCT_DEVICE := geehrc_sp
-PRODUCT_NAME := full_geehrc
+PRODUCT_NAME := full_geehrc_sp
 PRODUCT_BRAND := LGE
-PRODUCT_MODEL := geehrc4g
+PRODUCT_MODEL := geehrc4g_sp
 PRODUCT_MANUFACTURER := LGE
 PRODUCT_RESTRICT_VENDOR_FILES := true
 
 # Inherit from hardware-specific part of the product configuration
-$(call inherit-product, device/lge/geehrc/device.mk)
-$(call inherit-product-if-exists, vendor/lge/geehrc/device-vendor.mk)
+$(call inherit-product, device/lge/geehrc_sp/device.mk)
+$(call inherit-product-if-exists, vendor/lge/geehrc_sp/device-vendor.mk)

@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
+add_lunch_combo full_cm_geehrc_sp-userdebug
 add_lunch_combo cm_geehrc_sp-userdebug
+add_lunch_combo cm_geehrc_sp-eng

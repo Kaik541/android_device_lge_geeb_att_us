@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 The Android Open-Source Project
+# Copyright 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +14,5 @@
 # limitations under the License.
 #
 
-BOARD_KERNEL_CMDLINE := console=ttySHL0,115200,n8 androidboot.hardware=geehrc lpj=67677
-TARGET_KERNEL_CONFIG := cyanogen_j1sp-perf_defconfig
-TARGET_KERNEL_CUSTOM_TOOLCHAIN := arm-eabi-4.4.3
-TARGET_KERNEL_SOURCE := kernel/lge/gee-common
-
-#TARGET_PREBUILT_KERNEL := device/lge/geehrc/kernel
-
-# inherit from common gee
--include device/lge/gee-common/BoardConfigCommon.mk
-
-
-# inherit from the proprietary version
--include vendor/lge/geehrc_sp/BoardConfigVendor.mk
+PRODUCT_MAKEFILES := \
+    $(LOCAL_DIR)/full_geehrc.mk

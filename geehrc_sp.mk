@@ -26,3 +26,7 @@ $(call inherit-product-if-exists, vendor/lge/geehrc_sp/geehrc_sp-vendor.mk)
 # Inherit from gee-common
 $(call inherit-product, device/lge/gee-common/gee-common.mk)
 
+# Enable for debugging
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.debuggable=1
+    persist.service.adb.enable=1

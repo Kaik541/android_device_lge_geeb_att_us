@@ -30,8 +30,8 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 $(call inherit-product, vendor/cm/config/nfc_enhanced.mk)
 
 # Inherit device configuration
-$(call inherit-product, device/lge/geehrc_sp/device.mk)
-$(call inherit-product-if-exists, vendor/lge/geehrc_sp/device-vendor.mk)
+$(call inherit-product, device/lge/geehrc_sp/geehrc_sp.mk)
+$(call inherit-product-if-exists, vendor/lge/geehrc_sp/geehrc-vendor.mk)
 
 TARGET_SCREEN_HEIGHT := 1280
 TARGET_SCREEN_WIDTH := 768

@@ -24,6 +24,8 @@ TARGET_KERNEL_SOURCE := kernel/lge/gee-common
 # inherit from common gee
 -include device/lge/gee-common/BoardConfigCommon.mk
 
+# assert
+TARGET_OTA_ASSERT_DEVICE := geehrc,geehrc4g,geehrc_sp,ls970
 
 # inherit from the proprietary version
 -include vendor/lge/geehrc_sp/BoardConfigVendor.mk

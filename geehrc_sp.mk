@@ -20,6 +20,10 @@
 # Everything in this directory will become public
 
 ## (2) Also get non-open-source specific aspects if available
+
+PRODUCT_COPY_FILES += \
+device/lge/gee-common/init.geehrc.rc:root/init.geehrc.rc \
+device/lge/gee-common/init.geehrc.usb.rc:root/init.geehrc.usb.rc 
 $(call inherit-product-if-exists, vendor/lge/geehrc_sp/geehrc_sp-vendor.mk)
 
 

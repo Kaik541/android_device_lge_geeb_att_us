@@ -26,5 +26,8 @@ TARGET_KERNEL_CONFIG := cyanogen_j1sp-perf_defconfig
 # assert
 TARGET_OTA_ASSERT_DEVICE := geehrc,geehrc4g,geehrc_sp,ls970
 
+# board-info
+TARGET_BOARD_INFO_FILE := device/lge/geehrc_sp/board-info.txt
+
 # inherit from the proprietary version
 -include vendor/lge/geehrc_sp/BoardConfigVendor.mk

@@ -40,4 +40,4 @@ PRODUCT_DEVICE := geehrc_sp
 PRODUCT_NAME := cm_geehrc_sp
 
 #Set build fingerprint / ID / Prduct Name ect.
-PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=cm_geehrc_sp TARGET_DEVICE=geehrc_sp BUILD_FINGERPRINT=google/occam/geehrc:4.2/JOP40C/527662:user/release-keys PRIVATE_BUILD_DESC="occam-user 4.2 JOP40C 527662 release-keys"
+PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=cm_geehrc_sp TARGET_DEVICE=geehrc_sp BUILD_FINGERPRINT=google/geehrc_sp/geehrc:4.1.2/JZO54K/F180K19g.1356520508:user/release-keys PRIVATE_BUILD_DESC="geehrc_sp-user 4.1.2 JZ054K F180K19g.1356520508 release-keys"

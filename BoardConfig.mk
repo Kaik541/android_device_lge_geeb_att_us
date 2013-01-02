@@ -18,7 +18,7 @@ BOARD_KERNEL_CMDLINE := console=ttySHL0,115200,n8 androidboot.hardware=geehrc lp
 TARGET_KERNEL_CONFIG := cyanogen_j1sp-perf_defconfig
 
 
-#TARGET_PREBUILT_KERNEL := device/lge/geehrc/kernel
+TARGET_PREBUILT_KERNEL := device/lge/gee-common/kernel
 
 # inherit from common gee
 -include device/lge/gee-common/BoardConfigCommon.mk

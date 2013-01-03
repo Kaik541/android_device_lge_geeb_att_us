@@ -28,7 +28,7 @@ PRODUCT_NAME := full_geehrc_sp
 PRODUCT_BRAND := LGE
 PRODUCT_MODEL := geehrc4g_sp
 PRODUCT_MANUFACTURER := LGE
-PRODUCT_RESTRICT_VENDOR_FILES := true
+PRODUCT_RESTRICT_VENDOR_FILES := false
 
 # Inherit from hardware-specific part of the product configuration
 $(call inherit-product, device/lge/geehrc_sp/geehrc_sp.mk)

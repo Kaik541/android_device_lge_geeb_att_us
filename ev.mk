@@ -40,6 +40,6 @@ PRODUCT_PACKAGE_OVERLAYS += \
 
 # USB
 ADDITIONAL_DEFAULT_PROPERTIES += \
-    persist.sys.usb.config=mass_storage
+    persist.sys.usb.config=charge_only
 
 #ADDITIONAL_DEFAULT_PROPERTIES += persist.sys.usb.config=mtp,adb

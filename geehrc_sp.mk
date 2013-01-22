@@ -34,7 +34,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 PRODUCT_PROPERTY_OVERRIDES += \
    telephony.lteOnCdmaDevice=1 \
-   telephony.lte.cdma.device =1 \
+   telephony.lte.cdma.device=1 \
    ro.telephony.default_network=8 \
    ro.ril.def.preferred.network=8 \
    ril.subscription.types=NV,RUIM \

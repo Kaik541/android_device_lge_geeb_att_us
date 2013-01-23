@@ -42,7 +42,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
    ro.cdma.subscribe_on_ruim_ready=true \
    persist.radio.no_wait_for_card=1 \
    ro.cdma.home.operator.numeric=310120 \
-   ro.cdma.home.operator.alpha=Sprint \ 
+   ro.cdma.home.operator.alpha=Sprint \
    telephony.sms.pseudo_multipart=1
 
 

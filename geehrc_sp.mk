@@ -46,7 +46,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
    telephony.sms.pseudo_multipart=1
 
 
-# TODO: Ramdisk bits, these need to be oblitterated, at least most of it.
+# TODO: Ramdisk bits, these need to be obliterated, at least most of it.
 
 PRODUCT_COPY_FILES += \
     device/lge/geehrc_sp/ramdisk/init:root/init \

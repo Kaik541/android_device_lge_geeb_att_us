@@ -91,12 +91,12 @@ case "$target" in
         start quipc_main
 esac
 
-#case "$target" in
-#        "msm8960")
-#        start location_mq
-#        start xtwifi_inet
-#        start xtwifi_client
-#esac
+case "$target" in
+        "msm8960")
+        start location_mq
+        start xtwifi_inet
+        start xtwifi_client
+esac
 
 case "$target" in
     "msm7630_surf" | "msm7630_1x" | "msm7630_fusion")

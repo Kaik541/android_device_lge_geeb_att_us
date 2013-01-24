@@ -1,3 +1,14 @@
+# Copyright (C) 2012 The Android Open Source Project
+#
+# IMPORTANT: Do not create world writable files or directories.
+# This is a common source of Android security bugs.
+#
+
+import /init.${ro.hardware}.rc
+import /init.usb.rc
+import /init.trace.rc
+import /init.lge.early.rc
+
 on early-init
     # Set init and its forked children's oom_adj.
     write /proc/1/oom_adj -16
@@ -20,15 +31,13 @@ loglevel 3
     export ANDROID_ROOT /system
     export ANDROID_ASSETS /system/app
     export ANDROID_DATA /data
-    export EXTERNAL_STORAGE /mnt/sdcard
     export ASEC_MOUNTPOINT /mnt/asec
     export LOOP_MOUNTPOINT /mnt/obb
-    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/core-junit.jar:/system/framework/bouncycastle.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/framework2.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/apache-xml.jar
+    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/core-junit.jar:/system/framework/bouncycastle.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/framework_ext.jar:/system/framework/framework2.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/apache-xml.jar:/system/framework/com.lge.core.jar
 # 120215 younghan.kim@lge.com Porting Immersion Vib[S]
     # Set a path to TMP folder (RW accessible)
     export VIBE_PIPE_PATH /dev/pipes
 # 120215 younghan.kim@lge.com Porting Immersion Vib[E]
-
 # Backward compatibility
     symlink /system/etc /etc
     symlink /sys/kernel/debug /d
@@ -37,22 +46,10 @@ loglevel 3
 # but someday that may change.
     symlink /system/vendor /vendor
 
-# create mountpoints
-    mkdir /mnt 0775 root system
-    mkdir /mnt/sdcard 0000 system system
-
-# create USB host bus directory here so that libusbhost
-# can start monitoring.
-    mkdir /dev/bus 0755 root root
-    mkdir /dev/bus/usb 0755 root root
-
 # Create cgroup mount point for cpu accounting
     mkdir /acct
     mount cgroup none /acct cpuacct
     mkdir /acct/uid
-
-# Backwards Compat - XXX: Going away in G*
-    symlink /mnt/sdcard /sdcard
 
     mkdir /system
     mkdir /data 0771 system system
@@ -85,25 +82,36 @@ loglevel 3
     write /proc/sys/kernel/sched_compat_yield 1
     write /proc/sys/kernel/sched_child_runs_first 0
     write /proc/sys/kernel/randomize_va_space 2
+    write /proc/sys/kernel/kptr_restrict 2
+    write /proc/sys/kernel/dmesg_restrict 1
+    write /proc/sys/vm/mmap_min_addr 32768
+    write /proc/sys/kernel/sched_rt_runtime_us 950000
+    write /proc/sys/kernel/sched_rt_period_us 1000000
 
 # Create cgroup mount points for process groups
     mkdir /dev/cpuctl
     mount cgroup none /dev/cpuctl cpu
     chown system system /dev/cpuctl
     chown system system /dev/cpuctl/tasks
-    chmod 0777 /dev/cpuctl/tasks
+    chmod 0660 /dev/cpuctl/tasks
     write /dev/cpuctl/cpu.shares 1024
+    write /dev/cpuctl/cpu.rt_runtime_us 950000
+    write /dev/cpuctl/cpu.rt_period_us 1000000
 
-    mkdir /dev/cpuctl/fg_boost
-    chown system system /dev/cpuctl/fg_boost/tasks
-    chmod 0777 /dev/cpuctl/fg_boost/tasks
-    write /dev/cpuctl/fg_boost/cpu.shares 1024
+    mkdir /dev/cpuctl/apps
+    chown system system /dev/cpuctl/apps/tasks
+    chmod 0666 /dev/cpuctl/apps/tasks
+    write /dev/cpuctl/apps/cpu.shares 1024
+    write /dev/cpuctl/apps/cpu.rt_runtime_us 800000
+    write /dev/cpuctl/apps/cpu.rt_period_us 1000000
 
-    mkdir /dev/cpuctl/bg_non_interactive
-    chown system system /dev/cpuctl/bg_non_interactive/tasks
-    chmod 0777 /dev/cpuctl/bg_non_interactive/tasks
+    mkdir /dev/cpuctl/apps/bg_non_interactive
+    chown system system /dev/cpuctl/apps/bg_non_interactive/tasks
+    chmod 0666 /dev/cpuctl/apps/bg_non_interactive/tasks
     # 5.0 %
-    write /dev/cpuctl/bg_non_interactive/cpu.shares 52
+    write /dev/cpuctl/apps/bg_non_interactive/cpu.shares 52
+    write /dev/cpuctl/apps/bg_non_interactive/cpu.rt_runtime_us 700000
+    write /dev/cpuctl/apps/bg_non_interactive/cpu.rt_period_us 1000000
 
 # Allow everybody to read the xt_qtaguid resource tracking misc dev.
 # This is needed by any process that uses socket tagging.
@@ -115,19 +123,7 @@ on fs
     mount yaffs2 mtd@system /system
     mount yaffs2 mtd@system /system ro remount
     mount yaffs2 mtd@userdata /data nosuid nodev
-    mount yaffs2 mtd@persist /persist nosuid nodev
     mount yaffs2 mtd@cache /cache nosuid nodev
-    mount yaffs2 mtd@persist /persist nosuid nodev
-
-#on emmc-fs
-# mount mmc partitions
-#    wait /dev/block/mmcblk0p12
-#    mount ext4 /dev/block/mmcblk0p12 /system rw barrier=1
-#    wait /dev/block/mmcblk0p13
-#    exec /system/bin/e2fsck -p /dev/block/mmcblk0p13
-#    mount ext4 /dev/block/mmcblk0p13 /data nosuid nodev barrier=1 noauto_da_alloc
-#    mount ext4 /dev/block/mmcblk0p14 /persist nosuid nodev barrier=1
-#    mount ext4 /dev/block/mmcblk0p15 /cache nosuid nodev barrier=1
 
 on post-fs
     # once everything is setup, no need to modify /
@@ -187,13 +183,18 @@ on post-fs-data
     mkdir /data/misc/wifi 0770 wifi wifi
     chmod 0660 /data/misc/wifi/wpa_supplicant.conf
     mkdir /data/local 0751 root root
+    chmod 2770 /data/radio
+
+    # For security reasons, /data/local/tmp should always be empty.
+    # Do not place files or directories in /data/local/tmp
     mkdir /data/local/tmp 0771 shell shell
     mkdir /data/data 0771 system system
     mkdir /data/app-private 0771 system system
+    mkdir /data/app-asec 0700 root root
     mkdir /data/app 0771 system system
     mkdir /data/property 0700 root root
-    mkdir /data/radio 0770 radio radio
-    chmod 2770 /data/radio
+    mkdir /data/ssh 0750 root shell
+    mkdir /data/ssh/empty 0700 root root
 
     # create dalvik-cache, so as to enforce our permissions
     mkdir /data/dalvik-cache 0771 system system
@@ -215,12 +216,6 @@ on post-fs-data
     # won't work.
     # Set indication (checked by vold) that we have finished this action
     #setprop vold.post_fs_data_done 1
-
-    chown system system /sys/class/android_usb/android0/f_mass_storage/lun/file
-    chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun/file
-    chown system system /sys/class/android_usb/android0/f_rndis/ethaddr
-    chmod 0660 /sys/class/android_usb/android0/f_rndis/ethaddr
-
     service qcom-c_core-sh /system/bin/sh /init.qcom.class_core.sh
     class core
     user root
@@ -242,7 +237,7 @@ on boot
 
 # Memory management.  Basic kernel parameters, and allow the high
 # level system server to be able to adjust the kernel OOM driver
-# paramters to match how it is managing things.
+# parameters to match how it is managing things.
     write /proc/sys/vm/overcommit_memory 1
     write /proc/sys/vm/min_free_order_shift 4
     chown root system /sys/module/lowmemorykiller/parameters/adj
@@ -260,16 +255,35 @@ on boot
     chown radio system /sys/android_power/acquire_full_wake_lock
     chown radio system /sys/android_power/acquire_partial_wake_lock
     chown radio system /sys/android_power/release_wake_lock
-    chown radio system /sys/power/state
+    chown system system /sys/power/state
+    chown system system /sys/power/autosleep
+    chown system system /sys/power/wakeup_count
     chown radio system /sys/power/wake_lock
     chown radio system /sys/power/wake_unlock
-    chown radio system /sys/power/touch_event
-    chown radio system /sys/power/touch_event_timer
     chmod 0660 /sys/power/state
     chmod 0660 /sys/power/wake_lock
     chmod 0660 /sys/power/wake_unlock
-    chmod 0660 /sys/power/touch_event
-    chmod 0660 /sys/power/touch_event_timer
+
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/timer_rate
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/timer_rate
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/boost
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/boost
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/boostpulse
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/input_boost
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/input_boost
+
+    # Assume SMP uses shared cpufreq policy for all CPUs
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+
     chown system system /sys/class/timed_output/vibrator/enable
     chown system system /sys/class/leds/keyboard-backlight/brightness
     chown system system /sys/class/leds/lcd-backlight/brightness
@@ -300,7 +314,7 @@ on boot
 # Define TCP buffer sizes for various networks
 #   ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
     setprop net.tcp.buffersize.default 4096,87380,110208,4096,16384,110208
-    setprop net.tcp.buffersize.wifi    4096,221184,3461120,4096,221184,3461120
+    setprop net.tcp.buffersize.wifi    524288,1048576,2097152,262144,524288,1048576
     setprop net.tcp.buffersize.lte     4094,87380,1220608,4096,16384,1220608
     setprop net.tcp.buffersize.umts    4094,87380,110208,4096,16384,110208
     setprop net.tcp.buffersize.hspa    4094,87380,1220608,4096,16384,1220608
@@ -312,15 +326,14 @@ on boot
 
 # Assign TCP buffer thresholds to be ceiling value of technology maximums
 # Increased technology maximums should be reflected here.
-    write /proc/sys/net/core/rmem_max  3461120
-    write /proc/sys/net/core/wmem_max  3461120
+    write /proc/sys/net/core/rmem_max  2097152
+    write /proc/sys/net/core/wmem_max  1220608
 
 # Set this property so surfaceflinger is not started by system_init
     setprop system_init.startsurfaceflinger 0
 
     class_start core
-    #class_start main
-
+#    class_start main
 # For AP Sleep at Testmode 250-42-1 Sleep Flight Mode ON
     start qcom-post-boot
 
@@ -443,6 +456,7 @@ service netd /system/bin/netd
     class main
     socket netd stream 0660 root system
     socket dnsproxyd stream 0660 root inet
+    socket mdns stream 0660 root system
 
 service debuggerd /system/bin/debuggerd
     class main
@@ -451,10 +465,8 @@ service ril-daemon /system/bin/rild
     class main
     socket rild stream 660 root radio
     socket rild-debug stream 660 radio system
-	socket rild-cas stream 660 root radio
-
     user root
-    group radio cache inet misc audio sdcard_rw qcom_oncrpc diag
+    group radio cache inet misc audio sdcard_r sdcard_rw qcom_oncrpc diag qcom_diag log
 
 service surfaceflinger /system/bin/surfaceflinger
     class main
@@ -473,22 +485,15 @@ service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-sys
 service drm /system/bin/drmserver
     class main
     user drm
-## [LGE_S][20120620][hyeyoung1024.kim@lge.com][Next-i][DRM] PlayReady DRM Porting
-    group system inet drmrpc media_rw sdcard_rw
-## [LGE_E][20120620][hyeyoung1024.kim@lge.com][Next-i][DRM] PlayReady DRM Porting
+    group drm system inet drmrpc sdcard_r
 
 service media /system/bin/mediaserver
     class main
     user media
-# LGE_CHANGE_S, [G1_Player][cherylyn.chung@lge.com], 2012-01-16, For DivX DRM permission  {
-#    group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc
-    group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc system graphics net_raw divxdrm lgt_gid
-# LGE_CHANGE_E, [G1_Player][cherylyn.chung@lge.com], 2012-01-16, For DivX DRM permission  }    
+    group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc qcom_diag
     ioprio rt 4
-
-# LGE_BROADCAST_TDMB {
+# LGE_BROADCAST_TDMB
     onrestart restart broadcast
-# LGE_BROADCAST_TDMB }
 
 service bootanim /system/bin/bootanimation
     class main
@@ -503,7 +508,7 @@ service dbus /system/bin/dbus-daemon --system --nofork
     user bluetooth
     group bluetooth net_bt_admin
 
-service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -n -d
+service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -n
     class main
     socket bluetooth stream 660 bluetooth bluetooth
     socket dbus_bluetooth stream 660 bluetooth bluetooth
@@ -516,12 +521,9 @@ service installd /system/bin/installd
     class main
     socket installd stream 600 system system
 
-# mason.lee@lge.com 120710 LGE_GOTA Porting from LS860
-# matthew.choi@lge.com 120612
-# flash_recovery is only called after GOTA update to update recovery.img
-#service flash_recovery /sbin/write_recovery
-#    class main
-#    oneshot
+service flash_recovery /system/etc/install-recovery.sh
+    class main
+    oneshot
 
 service racoon /system/bin/racoon
     class main
@@ -542,7 +544,7 @@ service mtpd /system/bin/mtpd
 service keystore /system/bin/keystore /data/misc/keystore
     class main
     user keystore
-    group keystore
+    group keystore drmrpc
     socket keystore stream 666
 
 service dumpstate /system/bin/dumpstate -s
@@ -551,13 +553,14 @@ service dumpstate /system/bin/dumpstate -s
     disabled
     oneshot
 
-#LGE_CHANGE_S 2012.04 lg-msp@lge.com MTS TEAM
-#service mtsd /system/bin/mtsd_miniOS
-#    class late_start
-#    oneshot
+service sshd /system/bin/start-ssh
+    class main
+    disabled
 
-#service mtsd_fmgr /system/bin/mtsd_miniOS_fm
-#    class late_start
-#    oneshot
-#LGE_CHANGE_E 2012.04 lg-msp@lge.com MTS TEAM
-
+service mdnsd /system/bin/mdnsd
+    class main
+    user mdnsr
+    group inet net_raw
+    socket mdnsd stream 0660 mdnsr inet
+    disabled
+    oneshot
